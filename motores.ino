@@ -1,11 +1,5 @@
 #include <Ultrasonic.h>
 
-#include <IRremote.h>
-
-const int RECV_PIN = 7;
-IRrecv irrecv(RECV_PIN);
-decode_results results;
-
   
 int derecha1= 23; 
 int derecha2= 22;
@@ -48,8 +42,6 @@ int segundaCuenta = 0;
 void setup()
 {
   Serial.begin(9600);
-   irrecv.enableIRIn();
-  irrecv.blink13(true);
   pinMode (derecha1, OUTPUT);   
   pinMode (derecha2, OUTPUT);   
   pinMode (izquierda1, OUTPUT);   
@@ -85,12 +77,12 @@ void cambiarpotenciamotores(int x,int dif){
 }
 void avanzar(){
 
-  cambiarpotenciamotores(125,45);
-   digitalWrite(derecha2, LOW);
+  cambiarpotenciamotores(125,40);
    digitalWrite(derecha1, HIGH);
-   digitalWrite(izquierda1, HIGH);
+   digitalWrite(derecha2, LOW);
    digitalWrite(izquierda2, LOW);
-   delay(1000);
+   digitalWrite(izquierda1, HIGH);
+   delay(950);
   
 }
 void avanzarFase2(){
@@ -105,29 +97,31 @@ void avanzarFase2(){
 }
 void atras(){
   
-   cambiarpotenciamotores(125,30);
+   cambiarpotenciamotores(125,40);
+  
    digitalWrite(derecha1, LOW);
    digitalWrite(derecha2, HIGH);
    digitalWrite(izquierda2, HIGH);
    digitalWrite(izquierda1, LOW);
-  
+  delay(950);
 }
 void giroejeL(){
   
       /*cambiarpotenciamotores(0,0);
     delay(1000);
     */
-   cambiarpotenciamotores(250,0);
+    cambiarpotenciamotores(250,80);
+  // cambiarpotenciamotores(170,-80);
    digitalWrite(derecha2, HIGH);
    digitalWrite(derecha1, LOW);
    digitalWrite(izquierda1, HIGH);
    digitalWrite(izquierda2, LOW);
-   delay(550);
+   delay(538);
    
    
    /* while(getDistanceF()<25){
     cambiarpotenciamotores(240,0);
-    }
+    }ffase
    
    delay(300); 
     avanzar();
@@ -135,15 +129,14 @@ void giroejeL(){
 }
 void giroejeR(){
   
-    /* cambiarpotenciamotores(0,0);
-    delay(1000);
-    */
-   cambiarpotenciamotores(250,0);
+    
+   cambiarpotenciamotores(170,-80);
+   
    digitalWrite(derecha2, LOW);
    digitalWrite(derecha1, HIGH);
    digitalWrite(izquierda1, LOW);
    digitalWrite(izquierda2, HIGH);
-   delay(110);
+   delay(538);
   /*while(getDistanceF()<25){
    cambiarpotenciamotores(240,0);
     }
@@ -154,11 +147,11 @@ void giroejeR(){
 
 int Detener(){
   cambiarpotenciamotores(0,0);
-   delay(500);
+   delay(1000);
 }
 
-
-void MovimientoUnidadDelay(){
+boolean atras1=false;
+void MovimientoUnidadDelayFASE1(){
 
    if(getDistanceF()>10){
    avanzar();
@@ -184,6 +177,63 @@ void MovimientoUnidadDelay(){
           else{
             giroejeL();
              Detener();   
+           }
+    }
+
+}
+void MovimientoUnidadDelay(){
+
+   if(getDistanceF()>15 && getDistanceR()<18){
+    
+   avanzar();
+ }else if(getDistanceF()>15 && getDistanceR()>17){
+   giroejeR();
+        Detener();
+          avanzar();
+           Detener();
+        return;
+  }
+ 
+ 
+    Detener();  
+ 
+ 
+    if(getDistanceF()<=15){
+      
+      
+      if((getDistanceL()<15) && (getDistanceR()<15)){
+        giroejeR();
+        Detener();
+        }
+        
+        else if(getDistanceL()<getDistanceR()){
+          if(getDistanceL()<20){
+            atras1=true;
+            }
+            Serial.println("HOLAAA");
+            Serial.println(getDistanceL());
+          giroejeR();
+          Detener();
+          if(atras1){
+            atras1=false;
+            atras();
+             Detener();
+            }
+          }
+          
+          else{
+             if(getDistanceR()<20){
+            atras1=true;
+            }
+             Serial.println("HOLAAA");
+            Serial.println(getDistanceR());
+            giroejeL();
+             Detener();
+               if(atras1){
+            atras1=false;
+            atras();
+             Detener();
+            }   
            }
     }
 
@@ -252,7 +302,7 @@ int getDistance(int t1,int ec1){
         
           // Constrains??
             }
-         char getColor(){
+    char getColor(){
           digitalWrite(S2,LOW);
           digitalWrite(S3,LOW);
           
@@ -260,13 +310,13 @@ int getDistance(int t1,int ec1){
           frecuenciaRoja = pulseIn(out, LOW);
           
          // Filtro para que no tome valores más grandes que los máx y mínimos
-        if(frecuenciaRoja>115 || frecuenciaRoja<20){
+        if(frecuenciaRoja>80 || frecuenciaRoja<35){
           rojo = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaRoja>=29 && frecuenciaRoja<=115){
-          rojo  = map(frecuenciaRoja,20,115,255,0);
+         if (frecuenciaRoja>=35 && frecuenciaRoja<=80){
+          rojo  = map(frecuenciaRoja,35,80,255,0);
          }
         
           // Ajustando los filtros verdes de los fotodiodos para que sean leídos 
@@ -277,13 +327,13 @@ int getDistance(int t1,int ec1){
         frecuenciaVerde = pulseIn(out, LOW);
         
          // Filtro para que no tome valores más grandes que los máx y mínimos
-          if(frecuenciaVerde>166 || frecuenciaVerde<44){
+          if(frecuenciaVerde>106 || frecuenciaVerde<42){
           verde = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaVerde>=44 && frecuenciaVerde<=166){
-          verde = map(frecuenciaVerde,44,166,255,0);
+         if (frecuenciaVerde>=42 && frecuenciaVerde<=106){
+          verde = map(frecuenciaVerde,42,106,255,0);
          }
          
           // Ajustando los filtros azules de los fotodiodos para que sean leídos 
@@ -294,13 +344,22 @@ int getDistance(int t1,int ec1){
           frecuenciaAzul = pulseIn(out, LOW);
         
         // Filtro para que no tome valores más grandes que los máx y mínimos
-        if(frecuenciaAzul>119 || frecuenciaAzul<25){
+        if(frecuenciaAzul>122 || frecuenciaAzul<50){
           azul = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaAzul>=25 && frecuenciaAzul<=119){
-          azul = map(frecuenciaAzul,25,119,255,0);
+         if (frecuenciaAzul>=50 && frecuenciaAzul<=122){
+          azul = map(frecuenciaAzul,50,122,255,0);
+         }
+
+      if (frecuenciaAzul>=52 && frecuenciaAzul<=105 && frecuenciaVerde>=27 && frecuenciaVerde<=72 && frecuenciaRoja>=19 && frecuenciaRoja<=50){
+         Serial.println("¡Color Amarillo!");
+            color = 'y';
+            
+              digitalWrite(LEDA,HIGH);
+            digitalWrite(LEDV,HIGH);
+            return color;
          }
        /* 
         Serial.print(" R = ");
@@ -319,6 +378,7 @@ int getDistance(int t1,int ec1){
           digitalWrite(LEDR,LOW);
            digitalWrite(LEDA,LOW);
             digitalWrite(LEDV,LOW);
+            
                if (rojo>azul && rojo>verde){
                 digitalWrite(LEDR,HIGH);
           Serial.println("¡Color Rojo!");
@@ -347,6 +407,8 @@ int getDistance(int t1,int ec1){
               color = 'n';
              //  digitalWrite(LEDR,HIGH);
             }
+
+          
             return color;
     }
  
@@ -358,26 +420,14 @@ int sensorlinea(){
   
  }      
 bool sensorbola(){
-     
-        if (irrecv.decode(&results)){
-        irrecv.resume();
-        return true;
-      //  Serial.println(results.value, HEX);
-      }else{
-        irrecv.resume();
+   
         return false;
-        }
           
 }
 
 
 void loop()
 { 
-  while(true){
-   calibrarcolor();
-  //  getColor();
-  delay(1000);
-    }
  // LDR();
  // return;
 
@@ -394,16 +444,17 @@ void loop()
  
   if(fase==1){
       avanzar();
+      Detener();
         if(sensorbola()){
             giroejeR();
         }
         else{
           giroejeL();
         }
-       
+          Detener();
       while(getColor()!='v') {
-        Detener();  
-        MovimientoUnidadDelay();
+        MovimientoUnidadDelayFASE1();
+     //   Detener();  
             
       }
            fase++;
