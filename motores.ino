@@ -1,6 +1,12 @@
 #include <Ultrasonic.h>
 
-  
+  int fase2[5][2];
+  int fase2x=1;
+  int fase2y=0;
+  boolean positivox=false;
+  boolean positivoy=true;
+  boolean negativox=false;
+  boolean negativoy=false;
 int derecha1= 23; 
 int derecha2= 22;
 const int S0 = 12;  
@@ -59,7 +65,10 @@ void setup()
   pinMode(LEDV, OUTPUT);
   pinMode(LEDA, OUTPUT);
  
-
+  for(int i=0;i<5;i++)
+    for(int j=0;j<2;j++)
+    fase2[i][j]=0;
+    
   pinMode(Trigger1, OUTPUT); //pin como salida
   pinMode(Echo1, INPUT);  //pin como entrada
   pinMode(Trigger2, OUTPUT); //pin como salida
@@ -68,6 +77,7 @@ void setup()
   pinMode(Echo3, INPUT);  //pin como entrada
 
 }
+
 void cambiarpotenciamotores(int x,int dif){
 
     analogWrite(potenciamotor,x);
@@ -105,6 +115,24 @@ void atras(){
    digitalWrite(izquierda1, LOW);
   delay(950);
 }
+void avanzarPoquito(){
+
+cambiarpotenciamotores(90,18);
+   digitalWrite(derecha2, LOW);
+   digitalWrite(derecha1, HIGH);
+   digitalWrite(izquierda1, HIGH);
+   digitalWrite(izquierda2, LOW);
+   delay(300);
+}
+void atrasPoquito(){
+cambiarpotenciamotores(90,18);
+ digitalWrite(derecha1, LOW);
+   digitalWrite(derecha2, HIGH);
+   digitalWrite(izquierda2, HIGH);
+   digitalWrite(izquierda1, LOW);
+   delay(300);
+
+}
 void giroejeL(){
   
       /*cambiarpotenciamotores(0,0);
@@ -116,7 +144,7 @@ void giroejeL(){
    digitalWrite(derecha1, LOW);
    digitalWrite(izquierda1, HIGH);
    digitalWrite(izquierda2, LOW);
-   delay(538);
+   delay(490);
    
    
    /* while(getDistanceF()<25){
@@ -136,7 +164,7 @@ void giroejeR(){
    digitalWrite(derecha1, HIGH);
    digitalWrite(izquierda1, LOW);
    digitalWrite(izquierda2, HIGH);
-   delay(538);
+   delay(490);
   /*while(getDistanceF()<25){
    cambiarpotenciamotores(240,0);
     }
@@ -238,6 +266,162 @@ void MovimientoUnidadDelay(){
     }
 
 }
+void giroejeLFASE2(){
+  giroejeL();
+         if(positivox){
+          positivoy=true;
+          positivox=false;
+          }else if(negativox){
+            negativoy=true;
+            negativox=false;
+            }else if(negativoy){
+              positivox=true;
+              negativoy=false;
+              }else{
+                negativox=true;
+                positivoy=false;
+                }
+  }
+void   giroejeRFASE2(){
+      giroejeR();
+         
+         if(positivox){
+          negativoy=true;
+          positivox=false;
+          }else if(negativox){
+            positivoy=true;
+            negativox=false;
+            }else if(negativoy){
+              negativox=true;
+              negativoy=false;
+              }else{
+                positivox=true;
+                positivoy=false;
+                }
+  }
+  int direcciony=0;
+  int direccionx=0;
+void MovimientoUnidadDelayFASE2(){
+  direcciony=-1;
+  direccionx=-1;
+  if(positivoy){
+    direcciony=0;
+    }else if (negativoy)
+    {direcciony=1;}else if(positivox){direccionx=0;}else{direccionx=1;}
+  if(fase2[fase2x][fase2y]!=1){
+        giroejeLFASE2();     
+    }
+   if(getDistanceF()>10){
+  int count=0;
+  while(count<= 19 && sensorLinea() && getDistanceF()>10){
+    count++;
+    cambiarpotenciamotores(125,40);
+   digitalWrite(derecha1, HIGH);
+   digitalWrite(derecha2, LOW);
+   digitalWrite(izquierda2, LOW);
+   digitalWrite(izquierda1, HIGH);
+    delay(50);
+    }
+    if(count>10){
+        if(positivox){
+            fase2[fase2x][fase2y]=1;
+          fase2x++;
+          
+          }else if(negativox){
+              fase2[fase2x][fase2y]=1;
+            fase2x--;  
+            }else if(negativoy){
+              fase2y--;
+              }else{
+                fase2y++;
+                } 
+      }
+   Detener();
+  if(count!=19)
+  avanzarPoquito();
+  else
+  if(getDistanceF()<=10){
+    if(positivox){
+      giroejeLFASE2();
+      }else if(negativox){
+        giroejeRFASE2();
+        }
+    }else{
+      return;
+      }
+
+  Detener();
+  if(sensorLinea()){
+   atrasPoquito();
+     fase++;
+     return;
+    }else{
+    atrasPoquito();
+      if(direcciony==1){
+          if(negativox){
+              giroejeRFASE2();
+            }
+            if(positivox){
+              giroejeLFASE2();
+              }
+        }else if(direcciony==0){
+            if(positivox){
+              giroejeRFASE2();
+            }
+          if(negativox){
+              giroejeLFASE2();
+              }
+          }else if(direccionx==1){
+            if(negativoy){
+              giroejeRFASE2();
+            }
+            if(positivoy){
+              giroejeLFASE2();
+              }
+            }else{
+               if(positivoy){
+              giroejeRFASE2();
+            }
+          if(negativoy){
+              giroejeLFASE2();
+              }
+              }
+      }
+  
+      }else{
+        fase2[fase2x][fase2y]=1;
+              if(direcciony==1){
+          if(negativox){
+              giroejeRFASE2();
+            }
+            if(positivox){
+              giroejeLFASE2();
+              }
+        }else if(direcciony==0){
+            if(positivox){
+              giroejeRFASE2();
+            }
+          if(negativox){
+              giroejeLFASE2();
+              }
+          }else if(direccionx==1){
+            if(negativoy){
+              giroejeRFASE2();
+            }
+            if(positivoy){
+              giroejeLFASE2();
+              }
+            }else{
+               if(positivoy){
+              giroejeRFASE2();
+            }
+          if(negativoy){
+              giroejeLFASE2();
+              }
+              }
+      }
+      
+}
 
 
 
@@ -264,7 +448,22 @@ int getDistance(int t1,int ec1){
     int getDistanceL(){
      return getDistance(Trigger3,Echo3);
     }
-
+  void MovimientoLaberinto(){
+   if(getDistanceR() <15){
+      if (getDistanceF() >25){
+        avanzar();
+        Detener();
+      }else{
+        giroejeL();
+        Detener();
+      }
+   }else{
+    giroejeR();
+    Detener();
+    avanzar();
+    Detener();
+   }
+}
     void calibrarcolor(){
      //CALIBRACION
         
@@ -344,13 +543,13 @@ int getDistance(int t1,int ec1){
           frecuenciaAzul = pulseIn(out, LOW);
         
         // Filtro para que no tome valores más grandes que los máx y mínimos
-        if(frecuenciaAzul>122 || frecuenciaAzul<50){
+        if(frecuenciaAzul>140 || frecuenciaAzul<50){
           azul = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaAzul>=50 && frecuenciaAzul<=122){
-          azul = map(frecuenciaAzul,50,122,255,0);
+         if (frecuenciaAzul>=50 && frecuenciaAzul<=140){
+          azul = map(frecuenciaAzul,50,140,255,0);
          }
 
       if (frecuenciaAzul>=52 && frecuenciaAzul<=105 && frecuenciaVerde>=27 && frecuenciaVerde<=72 && frecuenciaRoja>=19 && frecuenciaRoja<=50){
@@ -361,7 +560,7 @@ int getDistance(int t1,int ec1){
             digitalWrite(LEDV,HIGH);
             return color;
          }
-       /* 
+       
         Serial.print(" R = ");
          Serial.print(rojo);
           Serial.print("  ");
@@ -372,7 +571,7 @@ int getDistance(int t1,int ec1){
          
          Serial.print(" V = ");
          Serial.print(verde);
-         */
+        
         //Impresion de los valores de cada color
          
           digitalWrite(LEDR,LOW);
@@ -412,31 +611,56 @@ int getDistance(int t1,int ec1){
             return color;
     }
  
-int sensorlinea(){
-  Serial.print("Lectura: ");
-  Serial.println(analogRead(A0));
-  return (analogRead(A0)); //Imprime el valor de la lectura del canal A0
-  //delay(2000); //retardo de 2 segundos entre lectura
-  
- }      
+bool sensorLinea(){
+  int valor1 = analogRead(A1);
+  int valor2 = analogRead(A0);
+  Serial.print("1-->");
+  Serial.println(valor1);
+  Serial.print("2-->");
+  Serial.println(valor2);
+  delay(1000);
+  if((valor1 > 500)&&(valor2 > 500)){
+    return true;
+  }
+  else{
+    return false;
+  }
+}     
 bool sensorbola(){
    
-        return false;
-          
+   int value = 0;  
+  int time = pulseIn(37,LOW);  
+  if(time>2000) // Checking if the Start Bit has been received. Start Bit Duration is 2.4ms  
+  {  
+   for(int counter1=0;counter1<12;counter1++) // A loop to receive the next 12 bits  
+   {  
+    if(pulseIn(37,LOW)>1000) // checking the duration of each pulse, if it is a '1' then we use it in our binary to decimal conversion, '0's can be ignored.  
+    {  
+     value = value + (1<< counter1);// binary to decimail conversion. 1<< i is nothing but 2 raised to the power of i  
+    }  
+   }  
+  }
+  //Serial.println(time);
+  if(time==0)
+    return true;
+
+          return false;
 }
 
 
 void loop()
 { 
- // LDR();
- // return;
+  
+  
+ delay(2000);
 
-  if(getColor()=='v'){
+  
+  if(getColor()=='a'){
     fase=2;
-    }else if(sensorlinea()>600){
+    }else if(sensorLinea()){
      fase=3;
       }else{
-        fase=1;
+        fase=3;
         }
 
  Serial.println("Fase: ");
@@ -461,32 +685,16 @@ void loop()
   }
   Serial.println("Fase: ");
  Serial.print(fase);
-  while(fase==2){
-    
-      Detener();
-      
-          if(sensorlinea()>500){
-               if(getDistanceL()< getDistanceR()){
-                  giroejeR();
-                  avanzar();
-                  giroejeL();
-               }
-               else{
-                  giroejeL();
-                  avanzar();
-                  giroejeR();
-               }
-          }
-          else{
-             avanzarFase2();
-          } 
+ while(fase==2){      
+       
+             MovimientoUnidadDelayFASE2();
+         
           
  }
  Serial.println("Fase: ");
  Serial.print(fase);
     while(fase==3){
-      Detener();
-      MovimientoUnidadDelay();
+      MovimientoLaberinto();
 
       if(getColor()=='r'){
           rampa=1;
