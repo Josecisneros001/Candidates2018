@@ -114,8 +114,8 @@ void cambiarpotenciamotores(int x,int dif){
 }
 void avanzar(){
 
-  cambiarpotenciamotores(130,-5);
-  while(contadorI<30 && contadorD<25){
+  cambiarpotenciamotores(130,-15);
+  while(contadorI<29 && contadorD<24){
    digitalWrite(derecha1, HIGH);
    digitalWrite(derecha2, LOW);
    digitalWrite(izquierda2, LOW);
@@ -256,7 +256,7 @@ void giroejeR(){
      }
     
    cambiarpotenciamotores(170,-80) ;
-   while(contadorI<20 && contadorD<=18){
+   while(contadorI<21 && contadorD<=19){
    digitalWrite(derecha2, LOW);
    digitalWrite(derecha1, HIGH);
    digitalWrite(izquierda1, LOW);
@@ -687,13 +687,13 @@ char getColor(){
           frecuenciaRoja = pulseIn(out, LOW);
           
          // Filtro para que no tome valores más grandes que los máx y mínimos
-        if(frecuenciaRoja>60 || frecuenciaRoja<30){
+        if(frecuenciaRoja>55 || frecuenciaRoja<25){
           rojo = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaRoja>=30 && frecuenciaRoja<=60){
-          rojo  = map(frecuenciaRoja,30,60,255,0);
+         if (frecuenciaRoja>=25 && frecuenciaRoja<=55){
+          rojo  = map(frecuenciaRoja,25,55,255,0);
          }
          delay(5);
         
@@ -705,13 +705,13 @@ char getColor(){
         frecuenciaVerde = pulseIn(out, LOW);
         
          // Filtro para que no tome valores más grandes que los máx y mínimos
-          if(frecuenciaVerde>82 || frecuenciaVerde<45){
+          if(frecuenciaVerde>60 || frecuenciaVerde<35){
           verde = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaVerde>=40 && frecuenciaVerde<=77){
-          verde = map(frecuenciaVerde,40,77,255,0);
+         if (frecuenciaVerde>=35 && frecuenciaVerde<=60){
+          verde = map(frecuenciaVerde,35,60,255,0);
          }
               delay(5);
           // Ajustando los filtros azules de los fotodiodos para que sean leídos 
@@ -722,21 +722,21 @@ char getColor(){
           frecuenciaAzul = pulseIn(out, LOW);
         
         // Filtro para que no tome valores más grandes que los máx y mínimos
-        if(frecuenciaAzul>130 || frecuenciaAzul<25){
+        if(frecuenciaAzul>130 || frecuenciaAzul<23){
           azul = 0;
          }
          
          // Si el valor entra en el rango, hace un map de los valores
-         if (frecuenciaAzul>=25&& frecuenciaAzul<=130){
-          azul = map(frecuenciaAzul,25,130,255,0);
+         if (frecuenciaAzul>=23&& frecuenciaAzul<=130){
+          azul = map(frecuenciaAzul,23,130,255,0);
          }
               delay(5);
 
-      if (frecuenciaAzul>=52 && frecuenciaAzul<=90 && frecuenciaVerde>=22 && frecuenciaVerde<=60 && frecuenciaRoja>=19 && frecuenciaRoja<=40){
+      if (frecuenciaAzul>=45 && frecuenciaAzul<=80 && frecuenciaVerde>=22 && frecuenciaVerde<=50 && frecuenciaRoja>=16 && frecuenciaRoja<=40){
          Serial.println("¡Color Amarillo!");
             color = 'y';
             
-       //       digitalWrite(LEDAM,HIGH);
+             digitalWrite(LEDAM,HIGH);
             
             return color;
          }
@@ -758,7 +758,7 @@ char getColor(){
        
 
                if (rojo>azul && rojo>verde){
-   //             digitalWrite(LEDR,HIGH);
+              digitalWrite(LEDR,HIGH);
           Serial.println("¡Color Rojo!");
           color = 'r';
            return color;
@@ -766,7 +766,7 @@ char getColor(){
           }
           
           if (azul>rojo && azul>verde){
-       //     digitalWrite(LEDA,HIGH);
+           digitalWrite(LEDA,HIGH);
             Serial.println("¡Color Azul!");
             color = 'a';
              return color;
@@ -775,7 +775,7 @@ char getColor(){
           }
           
           if (verde>rojo && verde>azul){
-        //    digitalWrite(LEDV,HIGH);
+            digitalWrite(LEDV,HIGH);
             Serial.println("¡Color Verde!");
             color = 'v';
              return color;
@@ -802,7 +802,7 @@ bool sensorLinea(){
  V2 = analogRead(A0);
   Serial.print("2-->");
   Serial.println(V2);
-  if((V2 > 375)){
+  if((V2 > 470)){
     return true;
   }
   else{
@@ -815,7 +815,7 @@ bool sensorbola(){
   int time = pulseIn(37,LOW);  
   if(time>2000) // Checking if the Start Bit has been received. Start Bit Duration is 2.4ms  
   {  
-   for(int counter1=0;counter1<12;counter1++) // A loop to receive the next 12 bits  
+   for(int counter1=0;counter1<12;counter1++) // to receive the next 12 bits  
    {  
     if(pulseIn(37,LOW)>1000) // checking the duration of each pulse, if it is a '1' then we use it in our binary to decimal conversion, '0's can be ignored.  
     {  
@@ -1340,7 +1340,25 @@ void solve(int x, int y) {
 int countbola=0;
 void loop()
 {   
+  /*
+    while(true){
+      Serial.print("Linea Blanca");
+      Serial.println(sensorLinea());
+      Serial.print("COLORES");
+      //calibrarcolor();
+      getColor();
+      Serial.print("Ultrasonico F");
+      Serial.println(getDistanceF());
+      
+      Serial.print("Ultrasonico D");
+      Serial.println(getDistanceR());
+      
+      Serial.print("Ultrasonico I");
+      Serial.println(getDistanceL());
+      delay(1000);
+      }
 
+     // */
   char azul=getColor();
  delay(2000);
 
@@ -1402,6 +1420,16 @@ void loop()
   }
         while(fase==3){
      MovimientoLaberinto();
+      if(!sensorLinea()){
+                Detener();
+                for(int iVeces =0;iVeces<10;iVeces++){
+             //   digitalWrite(LEDA,HIGH);
+                digitalWrite(LEDV,HIGH);
+                delay(100);
+             //   digitalWrite(LEDA,LOW);
+                digitalWrite(LEDV,LOW);
+                  }
+                }
      /*   
     solve(5, 1);
      if(countnegro==1 || countnegro==4){
